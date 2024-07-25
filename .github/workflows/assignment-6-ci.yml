@@ -17,24 +17,30 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }} # Node.js 설정 단계 이름
-        uses: actions/setup-node@v2 # actions/setup-node 액션 사용 (버전 2)
+      - name: Use Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }} # 매트릭스에서 정의된 Node.js 버전 사용
+          node-version: 20
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          cd packages/assignment-6
+          pnpm install
 
       - name: Run tsc & build
-        run: npm run build
+        run: |
+          cd packages/assignment-6
+          npm run build
 
-      - name: Upload build artifacts # 빌드 아티팩트 업로드 단계 이름
-        uses: actions/upload-artifact@v2 # actions/upload-artifact 액션 사용 (버전 2)
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: build # 아티팩트 이름
           path: build # 업로드할 빌드 결과물 경로
@@ -59,18 +65,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          cd packages/assignment-6
+          pnpm install
 
       - name: Run ESLint
         run: npm run lint
@@ -104,18 +114,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          cd packages/assignment-6
+          pnpm install
 
       - name: Run tests with coverage
         run: npm test
@@ -131,18 +145,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          cd packages/assignment-6
+          pnpm install
 
       - name: Install Lighthouse CI
         run: npm run lhci:install
@@ -180,18 +198,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: "16"
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          cd packages/assignment-6
+          pnpm install
 
       - name: Generate random reviewer and assign
         id: assign-reviewer
