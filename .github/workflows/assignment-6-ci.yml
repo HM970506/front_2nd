@@ -182,6 +182,7 @@ jobs:
       - name: Build project
         run: |
           cd packages/assignment-6
+          pnpm i
           npm run build
 
       - name: Start local server
@@ -193,7 +194,6 @@ jobs:
       - name: Install dependencies
         run: |
           cd packages/assignment-6
-          pnpm install
           pnpm i -g @lhci/cli
 
       - name: Run Lighthouse CI
@@ -253,12 +253,8 @@ jobs:
         id: assign-reviewer
         run: |
           # Define team members here
-          const teamMembers = ['user1', 'user2', 'user3'];  # Replace with actual GitHub usernames
-
-          // Randomly select a reviewer
+          const teamMembers = ['2pandi', 'naturekim']
           const randomReviewer = teamMembers[Math.floor(Math.random() * teamMembers.length)];
-
-          // Write selected reviewer to environment file
           console.log(`SELECTED_REVIEWER=${randomReviewer}`) >> $GITHUB_ENV
 
       - name: Assign reviewer
@@ -270,16 +266,14 @@ jobs:
             const selectedReviewer = process.env.SELECTED_REVIEWER;
             const prNumber = context.payload.pull_request.number;
 
-            // Add the selected reviewer to the pull request
             await github.rest.pulls.requestReviewers({
               ...context.repo,
               pull_number: prNumber,
               reviewers: [selectedReviewer]
             });
 
-            // Post a comment with a mention
             await github.rest.issues.createComment({
               ...context.repo,
               issue_number: prNumber,
-              body: `:wave: @${selectedReviewer}, you've been randomly selected to review this PR! Please take a look.`
+              body: `:wave: @${selectedReviewer}님, 리뷰를 부탁드립니다.`
             });
