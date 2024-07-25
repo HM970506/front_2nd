@@ -84,7 +84,9 @@ jobs:
           pnpm install
 
       - name: Run ESLint
-        run: npm run lint
+        run: |
+          cd packages/assignment-6
+          npm run lint
 
       - name: Read ESLint results
         id: read-eslint-results
@@ -133,7 +135,9 @@ jobs:
           pnpm install
 
       - name: Run tests with coverage
-        run: npm test
+        run: |
+          cd packages/assignment-6
+          npm test
 
       - name: Upload coverage report
         if: success() || failure()
@@ -164,11 +168,15 @@ jobs:
           pnpm install
 
       - name: Install Lighthouse CI
-        run: npm run lhci:install
+        run: |
+          cd packages/assignment-6
+          npm run lhci:install
 
       - name: Run Lighthouse CI
         id: run-lighthouse-ci
-        run: npm run lhci:run
+        run: |
+          cd packages/assignment-6
+          npm run lhci:run
 
       - name: Post Lighthouse CI results
         if: success() || failure()
