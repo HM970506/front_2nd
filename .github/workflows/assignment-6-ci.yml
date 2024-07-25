@@ -149,16 +149,19 @@ jobs:
       - name: Generate coverage comment
         if: success() || failure()
         run: |
-          # Install jq for JSON processing
           sudo apt-get install jq
 
-          # Extract coverage details (adjust paths and keys as necessary)
-          COVERAGE=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
+          if [ -f coverage/coverage-summary.json ]; then
+           LINE_COVERAGE=$(jq -r '.total.lines.pct' coverage/coverage-summary.json)
+           BRANCH_COVERAGE=$(jq -r '.total.branches.pct' coverage/coverage-summary.json)
+           FUNCTION_COVERAGE=$(jq -r '.total.functions.pct' coverage/coverage-summary.json)
+           STATEMENT_COVERAGE=$(jq -r '.total.statements.pct' coverage/coverage-summary.json)
 
-          # Generate comment content
-          COMMENT="Coverage Summary:\n\n- Line Coverage: $COVERAGE%"
+           COMMENT="### Test Results\n\n- **Test Status**: Success\n\n- **Coverage Summary**:\n  - Line Coverage: $LINE_COVERAGE%\n  - Branch Coverage: $BRANCH_COVERAGE%\n  - Function Coverage: $FUNCTION_COVERAGE%\n  - Statement Coverage: $STATEMENT_COVERAGE%"
+          else
+           COMMENT="### Test Results\n\n- **Test Status**: Failure\n\n- No coverage report found."
+          fi
 
-          # GitHub PR comment via API
           curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                -X POST \
                -d "{\"body\": \"$COMMENT\"}" \
@@ -198,7 +201,7 @@ jobs:
 
       - name: Run Lighthouse CI
         run: |
-          lhci collect --url=http://localhost:5000 --output=./lighthouse-report
+          lhci collect --url=http://localhost:3000 --output=./lighthouse-report
           lhci assert --assertions="first-contentful-paint<5000,largest-contentful-paint<2500"
           lhci upload --output=./lighthouse-report
         env:
@@ -253,7 +256,7 @@ jobs:
         id: assign-reviewer
         run: |
           # Define team members here
-          const teamMembers = ['2pandi', 'naturekim']
+          const teamMembers = ['2pandi', 'naturekim'];
           const randomReviewer = teamMembers[Math.floor(Math.random() * teamMembers.length)];
           console.log(`SELECTED_REVIEWER=${randomReviewer}`) >> $GITHUB_ENV
 
