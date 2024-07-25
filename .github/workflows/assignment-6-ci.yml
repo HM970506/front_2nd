@@ -2,8 +2,6 @@ name: CI Assignment 6
 
 on:
   pull_request:
-    types:
-      - opened
     paths:
       - "packages/assignment-6/**"
 
