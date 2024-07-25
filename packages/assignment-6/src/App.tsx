@@ -63,7 +63,7 @@ const App = () => {
   const handleCouponAdd = (newCoupon: Coupon) => {
     setCoupons((prevCoupons) => [...prevCoupons, newCoupon]);
   };
-  console.log("test2");
+  console.log("test3");
   return (
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-blue-600 text-white p-4">
