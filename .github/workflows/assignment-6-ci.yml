@@ -24,8 +24,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }} # 매트릭스에서 정의된 Node.js 버전 사용
 
-      - name: Install dependencies # 의존성 설치 단계 이름
-        run: npm install # `npm install` 명령어 실행
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Run tsc & build
         run: npm run build
@@ -63,8 +66,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Run ESLint
         run: npm run lint
@@ -105,8 +111,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Run tests with coverage
         run: npm test
@@ -129,8 +138,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Install Lighthouse CI
         run: npm run lhci:install
@@ -175,8 +187,11 @@ jobs:
         with:
           node-version: "16"
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Generate random reviewer and assign
         id: assign-reviewer
