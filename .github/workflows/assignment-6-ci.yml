@@ -68,10 +68,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
@@ -146,62 +146,87 @@ jobs:
           name: coverage-report
           path: coverage
 
+      - name: Generate coverage comment
+        if: success() || failure()
+        run: |
+          # Install jq for JSON processing
+          sudo apt-get install jq
+
+          # Extract coverage details (adjust paths and keys as necessary)
+          COVERAGE=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
+
+          # Generate comment content
+          COMMENT="Coverage Summary:\n\n- Line Coverage: $COVERAGE%"
+
+          # GitHub PR comment via API
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -X POST \
+               -d "{\"body\": \"$COMMENT\"}" \
+               https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments
   lighthouse:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
           version: latest
 
+      - name: Build project
+        run: |
+          cd packages/assignment-6
+          npm run build
+
+      - name: Start local server
+        run: |
+          pnpm install -g serve
+          nohup serve -s build > /dev/null 2>&1 &
+          sleep 10 # Allow time for the server to start
+
       - name: Install dependencies
         run: |
           cd packages/assignment-6
           pnpm install
-
-      - name: Install Lighthouse CI
-        run: |
-          cd packages/assignment-6
-          npm run lhci:install
+          pnpm i -g @lhci/cli
 
       - name: Run Lighthouse CI
-        id: run-lighthouse-ci
         run: |
-          cd packages/assignment-6
-          npm run lhci:run
+          lhci collect --url=http://localhost:5000 --output=./lighthouse-report
+          lhci assert --assertions="first-contentful-paint<5000,largest-contentful-paint<2500"
+          lhci upload --output=./lighthouse-report
+        env:
+          LHCI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Post Lighthouse CI results
-        if: success() || failure()
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const lhciReport = fs.readFileSync('report.json', 'utf8');
-            const lhciResults = JSON.parse(lhciReport);
+      - name: Generate Lighthouse comment
+        run: |
+          # Install jq for JSON processing
+          sudo apt-get install -y jq
 
-            let commentBody = `## Lighthouse 성능 측정 결과\n\n`;
-            commentBody += `| 카테고리 | 점수 |\n`;
-            commentBody += `|------|------|\n`;
-            commentBody += `| Performance | ${lhciResults.categories.performance.score * 100}% |\n`;
-            commentBody += `| Accessibility | ${lhciResults.categories.accessibility.score * 100}% |\n`;
-            commentBody += `| Best Practices | ${lhciResults.categories['best-practices'].score * 100}% |\n`;
-            commentBody += `| SEO | ${lhciResults.categories.seo.score * 100}% |\n`;
+          # Extract Lighthouse results
+          REPORT_FILE=$(find . -name 'report.html')
+          REPORT_URL="https://github.com/${{ github.repository }}/suites/${{ github.run_id }}/artifacts/$(find ./ -name 'report.zip' -exec basename {} \;)"
 
-            const issue_number = context.payload.pull_request.number;
-            github.rest.issues.createComment({
-              ...context.repo,
-              issue_number: issue_number,
-              body: commentBody
-            });
+          # Create comment body with results
+          COMMENT="### Lighthouse Report\n\n[View Lighthouse Report]($REPORT_URL)\n"
+
+          # Add some additional details if needed (e.g., score summary)
+          # Adjust the JSON path according to your report structure
+          # For instance:
+          # PERFORMANCE=$(jq -r '.categories.performance.score' $REPORT_FILE)
+          # COMMENT+="Performance Score: $PERFORMANCE\n"
+
+          # Post comment to PR
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -X POST \
+               -d "{\"body\": \"$COMMENT\"}" \
+               https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments
 
   assign_reviewer:
     runs-on: ubuntu-latest
@@ -212,7 +237,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "16"
+          node-version: 20
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
